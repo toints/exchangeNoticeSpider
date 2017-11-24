@@ -16,3 +16,7 @@ genall:
 
 run:
 	python run.py 
+
+
+copy:
+	cp -rf ./* /data/develop/exchangeNoticeSpider/

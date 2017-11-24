@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.selector import Selector
 from scrapy.spiders import CrawlSpider, Rule
-from scrapy.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.linkextractors import LinkExtractor
-from scrapy.http import Request
 import re
-import time
 from hashlib import md5
+import logging
 
 from NoticeSpider.items import NoticespiderItem
-from scrapy.conf import settings
 
-class BinanceSpider(scrapy.Spider):
+class BinanceSpider(CrawlSpider):
+    logger = logging.getLogger("BinanceSpider")
     name = "Binance"
+    host = 'https://support.binance.com'
     allowed_domains = ["binance.com"]
     start_urls = (
             'https://support.binance.com/hc/zh-cn/sections/115000106672-%E6%96%B0%E5%B8%81%E4%B8%8A%E7%BA%BF',
@@ -27,17 +25,18 @@ class BinanceSpider(scrapy.Spider):
 
     def parse(self, response):
         try:
-            article_list = response.xpath('//ul[@class="article-list"]')
-            self.log.info('------ start article list ---------')
-            self.log.info(article_list)
-            self.log.info('------ end article list ---------')
-            for article in article_list:
+            article_list = response.xpath('//ul[@class="article-list"]/li/a').extract()
+            #self.logger.DEBUG(article_list)
+            for i in range(0, len(article_list)):
                 item = NoticespiderItem()
-                item['url'] = article.xpath('li/a/@href')
+                url = re.findall(r'<a href="(.*?)" class="', article_list[i], re.S)[0]
+                item['url'] = self.host + url
+                self.logger.info(item['url'])
                 item['urlmd5'] = md5(item['url']).hexdigest()
-                item['title'] = article.xpath('li/a/text()').extract()
-                self.log.info('ITEM--> url:%s, urlmd5:%s, title:%s' %(item['url'], item['urlmd5'], item['title']))
+                item['title'] = re.findall(r'class="article-list-link">(.*?)</a>', article_list[i], re.S)[0]
+                self.logger.info('ITEM--> url:%s, urlmd5:%s, title:%s',item['url'], item['urlmd5'], item['title'])
                 yield item
         except Exception,e:
-            self.log.exception(e)
+            self.logger.critical(e)
+
 

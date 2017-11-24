@@ -9,5 +9,7 @@ from scrapy.utils.project import get_project_settings
 
 process = CrawlerProcess(get_project_settings())
 
-process.crawl('Binance', domain='binance.com')
+#process.crawl('Binance', domain='binance.com')
+#process.crawl('OKex', domain='okex.com')
+process.crawl('HuobiPro', domain='huobi.pro')
 process.start()

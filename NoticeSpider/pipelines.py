@@ -43,7 +43,7 @@ class StoreMySQLPipeline(object):
                 db = settings['MYSQL_DBNAME'],
                 user = settings['MYSQL_USER'],
                 passwd = settings['MYSQL_PASSWD'],
-                charset = 'utf-8',
+                charset = 'utf8',
                 cursorclass = MySQLdb.cursors.DictCursor,
                 use_unicode=True
                 )
@@ -57,11 +57,16 @@ class StoreMySQLPipeline(object):
         return d
 
     def db_insert(self, conn, item, spider):
-        self.log.info("MySQL insert " + item['url'])
-
         now = int(time.time())
-        self.log.info('INSERT MYSQL--> urlmd5:%s, url:%s, title:%s, time:%s, spierName:%s' %(item['urlmd5'], item['url'], item['title'], now, spider.name))
-        #conn.execute(SQL_STR['INSERT_SPIDER'], (url_md5, item['url'], item['title'], now, spider.name))
+        self.log.info('INSERT MYSQL--> urlmd5:%s, url:%s, title:%s, time:%s, spierName:%s', item['urlmd5'], item['url'], item['title'], now, spider.name)
+        try:
+            conn.execute(SQL_STR['INSERT_SPIDER'], (item['urlmd5'], item['url'], item['title'], now, spider.name))
+        except Exception,e:
+            if 'Duplicate entry' in e[1]:
+                self.log.debug('******* item url:%s already in MYSQL', item['urlmd5'])
+                pass
+            else:
+                self.log.critical(e)
 
     def handle_error(self, failure, item, spider):
         self.log.error(failure)
