@@ -19,13 +19,17 @@ class HuobiproSpider(scrapy.Spider):
     logger = logging.getLogger("HuobiproSpider")
 
     rules = (
-            Rule(LinkExtractor(allow=(r'/zh-cn/notice/')), callback="parse", follow=True),
+            Rule(LinkExtractor(allow=()), callback="parse", follow=True),
             )
 
     def parse(self, response):
         try:
-            article_list = response.xpath('//ul[@class="page_notice_list_content"]/li/a').extract()
+            body = response.body.decode(response.encoding)
+            self.logger.info(body)
+            article_list = response.xpath('//*[@id="notice"]/ul')
+            #article_list = response.xpath('//ul[@class="page_notice_list_content"]/li/a').extract()
             self.logger.debug(article_list)
+            return
             for i in range(0, len(article_list)):
                 item = NoticespiderItem()
                 url = re.findall(r'<a href="(.*?)">', article_list[i], re.S)[0]

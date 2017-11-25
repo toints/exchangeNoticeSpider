@@ -1,3 +1,13 @@
+help:
+	@echo	"make genall	-- generate all spiders"
+	@echo	"make run	-- run all spiders"
+	@echo	"make runDeamon	-- run all spiders in deamon"
+	@echo	"make copy	-- copy source code to github path"
+
+
+copy:
+	cp -rf ./* /data/develop/exchangeNoticeSpider/
+
 genall:
 	scrapy genspider Binance binance.com
 	scrapy genspider OKex okex.com
@@ -17,6 +27,5 @@ genall:
 run:
 	python run.py 
 
-
-copy:
-	cp -rf ./* /data/develop/exchangeNoticeSpider/
+runDeamon:
+	nohup python run.py &
